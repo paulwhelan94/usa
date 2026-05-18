@@ -56,8 +56,6 @@
         
         /* 
            SVG Saltire Background 
-           Using an SVG <g> group for opacity ensures the intersection NEVER compounds or brightens. 
-           It flattens the shapes first, then applies a uniform 18% alpha to the whole cross.
         */
         .saltire-bg {
             background-color: #0065BF;
@@ -75,19 +73,21 @@
         <!-- Premium Header Panel (Deep USA Blue Anchor) -->
         <header class="bg-usa-blue pt-6 pb-4 px-4 border-b border-usa-red/20 shrink-0 shadow-md">
             <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center space-x-2">
-                    <div class="bg-usa-red text-white w-9 h-9 rounded-xl flex items-center justify-center font-bold shadow-lg shadow-usa-red/20 text-lg">
+                <div class="flex items-center space-x-3">
+                    <!-- USA Flag removed from red box and enlarged -->
+                    <div class="text-4xl drop-shadow-md flex items-center justify-center">
                         🇺🇸
                     </div>
-                    <div>
-                        <h1 class="font-display font-bold text-lg tracking-tight text-white">SMARTY PINTS US TOUR</h1>
-                        <p class="text-xs text-slate-200 tracking-wider uppercase font-semibold">NYC • Stamford • Mystic • Newport • Boston</p>
+                    <div class="min-w-0">
+                        <h1 class="font-display font-bold text-lg tracking-tight text-white leading-tight">SMARTY PINTS US TOUR</h1>
+                        <!-- Reduced text size and tracking to fit on mobile screens -->
+                        <p class="text-[10px] text-slate-200 tracking-normal uppercase font-semibold truncate">NYC • Stamford • Mystic • Newport • Boston</p>
                     </div>
                 </div>
             </div>
 
             <!-- Two Tabs: Lynsey & Paul vs Kaitlin & Andrew (Red Accent for Active) -->
-            <div class="bg-black/15 p-1 rounded-2xl flex border border-white/10">
+            <div class="bg-black/15 p-1 rounded-2xl flex border border-white/10 mt-2">
                 <button onclick="switchTab('lynsey_paul')" id="tab-lynsey_paul" class="flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition bg-usa-red text-white shadow-md shadow-usa-red/10">
                     <span>Lynsey & Paul</span>
                 </button>
@@ -108,9 +108,9 @@
             <span class="font-mono text-white">June 2026</span>
         </footer>
 
-        <!-- Sliding Detail Page Overlay -->
-        <div id="detail-overlay" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex justify-end">
-            <div id="detail-drawer" class="w-full max-w-sm h-full bg-white shadow-2xl slide-over transform translate-x-full flex flex-col border-l border-slate-200">
+        <!-- Sliding Detail Page Overlay (Modified to block out calendar entirely) -->
+        <div id="detail-overlay" class="absolute inset-0 bg-white z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex justify-end">
+            <div id="detail-drawer" class="w-full h-full bg-white slide-over transform translate-x-full flex flex-col">
                 <!-- Overlay Header -->
                 <div class="p-4 bg-usa-blue text-white border-b border-slate-200 flex items-center justify-between shrink-0">
                     <button onclick="closeDetails()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-95">
@@ -128,26 +128,26 @@
                 <!-- Overlay Contents (Scrollable Light Mode Cards) -->
                 <div class="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar bg-white">
                     
-                    <!-- Hotel Details Section -->
-                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
-                        <div class="flex items-center space-x-2.5 mb-3 text-emerald-600">
-                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                <i class="fa-solid fa-hotel text-sm"></i>
-                            </div>
-                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Hotel</h3>
-                        </div>
-                        <p id="drawer-hotel" class="text-slate-700 text-sm leading-relaxed bg-white p-3 rounded-xl border border-slate-200 font-medium"></p>
-                    </div>
-
-                    <!-- Travel Routing Section (Dynamic visibility based on travel data) -->
+                    <!-- Travel Routing Section -->
                     <div id="drawer-travel-section" class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
                         <div class="flex items-center space-x-2.5 mb-3 text-sky-600">
                             <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
                                 <i class="fa-solid fa-plane-departure text-sm"></i>
                             </div>
-                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Travel Plans</h3>
+                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Travel</h3>
                         </div>
                         <div id="drawer-travel" class="text-slate-700 text-sm leading-relaxed space-y-2 whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200"></div>
+                    </div>
+
+                    <!-- Accommodation Details Section -->
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
+                        <div class="flex items-center space-x-2.5 mb-3 text-emerald-600">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-hotel text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Accommodation</h3>
+                        </div>
+                        <p id="drawer-hotel" class="text-slate-700 text-sm leading-relaxed bg-white p-3 rounded-xl border border-slate-200 font-medium"></p>
                     </div>
 
                     <!-- Activity Plan Section -->
@@ -188,7 +188,7 @@
                 place: "Travel to NYC",
                 icon: "✈️",
                 hotel: "Hilton Garden Inn New York / Midtown Park Ave",
-                travel: "🚗 Glasgow to Manchester (before 2:55 PM)\n✈️ Flight: Manchester (MAN) to JFK (New York)\n⏰ Departs: 2:55 PM | Arrives: 5:45 PM\n🚕 Taxi/Ride from JFK airport direct to Manhattan hotel",
+                travel: "🚗 Glasgow to Manchester\n✈️ MAN (14:55) to JFK (17:45)\n🚕 Taxi from JFK to Manhattan",
                 plan: "Check-in, drop bags and settle in at Hilton Garden Inn Midtown Park Ave. Step out to explore a slice of local Midtown Manhattan and grab a celebratory arrival drink/bite!"
             },
             {
@@ -206,7 +206,6 @@
                 place: "Exploring Connecticut",
                 icon: "🍕",
                 hotel: "Stamford, CT (Sam & Chloe's)",
-                travel: "🚶 Local walking and leisure transport in Stamford.",
                 plan: "A beautiful local day around coastal Connecticut! Walk along Stamford's harbor point, visit local parks, grab a leisurely lunch and spend the evening enjoying great drinks and BBQ with Sam & Chloe."
             },
             {
