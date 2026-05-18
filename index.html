@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smarty Pints US Tour</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Space Grotesk for sports-app feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for clean iconography -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        scotland: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#0065BF', /* Official St Andrew's Blue */
+                            700: '#0052a3',
+                        },
+                        usa: {
+                            blue: '#0A3161',
+                            red: '#B31942'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth, native-like mobile transitions */
+        .slide-over {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tab-transition {
+            transition: all 0.2s ease-in-out;
+        }
+        /* Hide scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 
+           SVG Saltire Background 
+           Using an SVG <g> group for opacity ensures the intersection NEVER compounds or brightens. 
+           It flattens the shapes first, then applies a uniform 18% alpha to the whole cross.
+        */
+        .saltire-bg {
+            background-color: #0065BF;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cg opacity='0.18' fill='%23ffffff'%3E%3Cpolygon points='0,0 15,0 100,85 100,100 85,100 0,15' /%3E%3Cpolygon points='100,0 85,0 0,85 0,100 15,100 100,15' /%3E%3C/g%3E%3C/svg%3E");
+            background-size: 100% 100%;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 h-full overflow-hidden select-none bg-white">
+
+<!-- Full screen mobile wrapper centered on desktop screens -->
+<div class="flex justify-center h-full w-full bg-slate-100">
+    <div class="relative w-full max-w-md h-full bg-white shadow-2xl overflow-hidden flex flex-col border-x border-slate-200">
+        
+        <!-- Premium Header Panel (Deep USA Blue Anchor) -->
+        <header class="bg-usa-blue pt-6 pb-4 px-4 border-b border-usa-red/20 shrink-0 shadow-md">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-usa-red text-white w-9 h-9 rounded-xl flex items-center justify-center font-bold shadow-lg shadow-usa-red/20 text-lg">
+                        🇺🇸
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-lg tracking-tight text-white">SMARTY PINTS US TOUR</h1>
+                        <p class="text-xs text-slate-200 tracking-wider uppercase font-semibold">NYC • Stamford • Mystic • Newport • Boston</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Tabs: Lynsey & Paul vs Kaitlin & Andrew (Red Accent for Active) -->
+            <div class="bg-black/15 p-1 rounded-2xl flex border border-white/10">
+                <button onclick="switchTab('lynsey_paul')" id="tab-lynsey_paul" class="flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition bg-usa-red text-white shadow-md shadow-usa-red/10">
+                    <span>Lynsey & Paul</span>
+                </button>
+                <button onclick="switchTab('kaitlin_andrew')" id="tab-kaitlin_andrew" class="flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition text-slate-200 hover:text-white">
+                    <span>Kaitlin & Andrew</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Scroll Area - Premium Readable Light Layout -->
+        <main class="flex-1 overflow-y-auto px-4 py-4 space-y-3 no-scrollbar bg-white" id="calendar-container">
+            <!-- Dynamically populated via JavaScript -->
+        </main>
+
+        <!-- Static bottom UI helper (Updated Footer) -->
+        <footer class="bg-usa-blue py-3 px-6 text-center text-[10px] text-white border-t border-usa-red/20 shrink-0 flex justify-between items-center font-bold">
+            <span>Smarty Pints US Tour</span>
+            <span class="font-mono text-white">June 2026</span>
+        </footer>
+
+        <!-- Sliding Detail Page Overlay -->
+        <div id="detail-overlay" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex justify-end">
+            <div id="detail-drawer" class="w-full max-w-sm h-full bg-white shadow-2xl slide-over transform translate-x-full flex flex-col border-l border-slate-200">
+                <!-- Overlay Header -->
+                <div class="p-4 bg-usa-blue text-white border-b border-slate-200 flex items-center justify-between shrink-0">
+                    <button onclick="closeDetails()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-95">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div class="text-center flex-1 mx-2">
+                        <p id="drawer-date" class="text-xs font-semibold text-slate-300 uppercase tracking-widest font-display"></p>
+                        <h2 id="drawer-place" class="font-bold text-lg text-white leading-tight truncate"></h2>
+                    </div>
+                    <div id="drawer-icon-container" class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-lg">
+                        <!-- Dynamic overlay category icon -->
+                    </div>
+                </div>
+
+                <!-- Overlay Contents (Scrollable Light Mode Cards) -->
+                <div class="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar bg-white">
+                    
+                    <!-- Hotel Details Section -->
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
+                        <div class="flex items-center space-x-2.5 mb-3 text-emerald-600">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-hotel text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Hotel</h3>
+                        </div>
+                        <p id="drawer-hotel" class="text-slate-700 text-sm leading-relaxed bg-white p-3 rounded-xl border border-slate-200 font-medium"></p>
+                    </div>
+
+                    <!-- Travel Routing Section (Dynamic visibility based on travel data) -->
+                    <div id="drawer-travel-section" class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
+                        <div class="flex items-center space-x-2.5 mb-3 text-sky-600">
+                            <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-plane-departure text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Travel Plans</h3>
+                        </div>
+                        <div id="drawer-travel" class="text-slate-700 text-sm leading-relaxed space-y-2 whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200"></div>
+                    </div>
+
+                    <!-- Activity Plan Section -->
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
+                        <div class="flex items-center space-x-2.5 mb-3 text-amber-600">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-calendar-day text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-sm tracking-wide text-slate-800">Plan for the Day</h3>
+                        </div>
+                        <p id="drawer-plan" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200"></p>
+                    </div>
+
+                </div>
+
+                <!-- Footer closing option -->
+                <div class="p-4 bg-slate-50 border-t border-slate-200 text-center shrink-0">
+                    <button onclick="closeDetails()" class="w-full py-3 rounded-xl bg-usa-blue hover:bg-[#07244a] text-white font-semibold text-sm transition tracking-wider active:scale-[0.98]">
+                        Back to Calendar Timeline
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Active configuration state variables
+    let currentTab = "lynsey_paul";
+
+    // Complete Trip Dataset for June 12 to June 22, 2026
+    const plannerData = {
+        lynsey_paul: [
+            {
+                id: "lp-1",
+                date: "Friday 12 June",
+                place: "Travel to NYC",
+                icon: "✈️",
+                hotel: "Hilton Garden Inn New York / Midtown Park Ave",
+                travel: "🚗 Glasgow to Manchester (before 2:55 PM)\n✈️ Flight: Manchester (MAN) to JFK (New York)\n⏰ Departs: 2:55 PM | Arrives: 5:45 PM\n🚕 Taxi/Ride from JFK airport direct to Manhattan hotel",
+                plan: "Check-in, drop bags and settle in at Hilton Garden Inn Midtown Park Ave. Step out to explore a slice of local Midtown Manhattan and grab a celebratory arrival drink/bite!"
+            },
+            {
+                id: "lp-2",
+                date: "Saturday 13 June",
+                place: "Day in NYC / Scotland vs Haiti",
+                icon: "🗽",
+                hotel: "Stamford, CT (Staying with Sam & Chloe)",
+                travel: "🚇 Subway within Manhattan\n🚗 Evening drive/commute to Stamford with Sam and Chloe.",
+                plan: "Spend a magical daytime in New York City with the crew.\n\n🍻 9:00 PM: Watch Scotland vs Haiti at an authentic New York Pub alongside Sam & Chloe!\n\n🚗 Late evening: Head up to Stamford with Sam & Chloe to check into their place."
+            },
+            {
+                id: "lp-3",
+                date: "Sunday 14 June",
+                place: "Exploring Connecticut",
+                icon: "🍕",
+                hotel: "Stamford, CT (Sam & Chloe's)",
+                travel: "🚶 Local walking and leisure transport in Stamford.",
+                plan: "A beautiful local day around coastal Connecticut! Walk along Stamford's harbor point, visit local parks, grab a leisurely lunch and spend the evening enjoying great drinks and BBQ with Sam & Chloe."
+            },
+            {
+                id: "lp-4",
+                date: "Monday 15 June",
+                place: "Day in NYC",
+                icon: "🗽",
+                hotel: "Stamford, CT (Sam & Chloe's)",
+                travel: "🚗 Local leisure driving around Stamford & Greenwich beach area.",
+                plan: "Day trip to nearby Greenwich or Stamford beaches. Enjoy some New England coastal dining, watch the sun set over the water, and prepare bags for the onward trip to New England!"
+            },
+            {
+                id: "lp-5",
+                date: "Tuesday 16 June",
+                place: "Road Trip via Mystic",
+                icon: "🚗",
+                hotel: "Newport En-Route Hotel (TBC)",
+                travel: "🚙 Pick up hire car in Stamford.\n🚗 Drive Stamford ➡️ Mystic (approx 1.5 hrs)\n🚗 Drive Mystic ➡️ Newport En-Route Hotel (approx 1 hr)",
+                plan: "Morning: Reunite with Andrew and Kaitlin in Stamford! All board the hire car and head east.\n\n🦞 Afternoon: Stop in the historic seaport of Mystic, CT for a lovely coastal walk and lunch (Mystic Pizza, anyone?).\n\nEvening: Drive toward Newport and check in at our cozy hotel en-route."
+            },
+            {
+                id: "lp-6",
+                date: "Wednesday 17 June",
+                place: "Newport & Red Sox Game",
+                icon: "⚾",
+                hotel: "Boston Central Hotel (TBC)",
+                travel: "🚗 Newport ➡️ Boston (approx 1.5 hrs)\n🚙 Drop off hired car on arrival in Boston.\n🚇 T-Subway to Fenway Park.",
+                plan: "Morning & early afternoon: Explore Newport's legendary mansions and spectacular Ocean Drive.\n\nLate Afternoon: Drive to Boston, drop off our hire car and check into our hotel.\n\n⚾ 6:30 PM: Head to iconic Fenway Park to see the Boston Red Sox take on the Toronto Blue Jays!"
+            },
+            {
+                id: "lp-7",
+                date: "Thursday 18 June",
+                place: "Day in Boston",
+                icon: "🦞",
+                hotel: "Boston Central Hotel (TBC)",
+                travel: "🚶 Walking & historic Boston T-Subway system.",
+                plan: "Full sightseeing day in gorgeous Boston! Explore the historic Freedom Trail, grab clam chowder and lobster rolls at Quincy Market, walk the cobblestones of Beacon Hill, and enjoy a pub crawl around historic taverns."
+            },
+            {
+                id: "lp-8",
+                date: "Friday 19 June",
+                place: "Scotland vs Morocco",
+                icon: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+                hotel: "Boston Central Hotel (TBC)",
+                travel: "🚆 Train/Express Event Shuttle from Boston to Foxborough (Gillette Stadium) for Paul.\n🚶 Local Boston walking for Lynsey.",
+                plan: "🏆 WORLD Cup GAME DAY: SCOTLAND VS MOROCCO!\n\n🍻 Paul & Andrew head down to Foxborough to join the Tartan Army tailgate at Gillette Stadium!\n\n🛍️ Lynsey and Kaitlin will chill out, shop, and relax together in Boston."
+            },
+            {
+                id: "lp-9",
+                date: "Saturday 20 June",
+                place: "Day in Boston",
+                icon: "🦞",
+                hotel: "Boston Central Hotel (TBC)",
+                plan: "A beautiful full weekend day in Boston. Choose between a premium harbor cruise, visiting Harvard University across the river in Cambridge, or relaxing over drinks in the Seaport District celebrating Scotland's result!"
+            },
+            {
+                id: "lp-10",
+                date: "Sunday 21 June",
+                place: "Drive to JFK & Fly Home",
+                icon: "🚗",
+                hotel: "Overnight Flight (In Transit)",
+                travel: "🚙 Hire a car in Boston.\n🚗 Drive Boston ➡️ JFK Airport (approx 4.5 hrs)\n✈️ Flight: JFK to Manchester (MAN) @ 8:01 PM",
+                plan: "Check out of our Boston hotel early. Drive down back through Massachusetts, Connecticut and New York straight to JFK Airport.\n\nDrop off hire car, check in for return flight to Manchester and enjoy pre-flight airport dinner."
+            },
+            {
+                id: "lp-11",
+                date: "Monday 22 June",
+                place: "Return to Glasgow",
+                icon: "✈️󠁧󠁢󠁳󠁣󠁴󠁿",
+                hotel: "Your Own Bed!",
+                travel: "🛬 Arrive Manchester @ 8:15 AM\n🚗 Drive Manchester Airport ➡️ Glasgow home",
+                plan: "Arrive back in Manchester after an overnight flight. Step into the car and share your best trip memories during the final drive back up north to beautiful Glasgow."
+            }
+        ],
+        kaitlin_andrew: [
+            {
+                id: "ka-1",
+                date: "Friday 12 June",
+                place: "Travel to NYC",
+                icon: "✈️",
+                hotel: "Manhattan Hotel (TBC)",
+                travel: "🚗 Glasgow to Manchester (before 2:55 PM)\n✈️ Flight: Manchester (MAN) to JFK (New York)\n⏰ Departs: 2:55 PM | Arrives: 5:45 PM\n🚕 Taxi/Ride from JFK airport direct to Manhattan hotel",
+                plan: "Check-in, drop bags and settle in at Manhattan Hotel. Step out to explore a slice of local Midtown Manhattan and grab a celebratory arrival drink/bite!"
+            },
+            {
+                id: "ka-2",
+                date: "Saturday 13 June",
+                place: "Day in NYC / Scotland vs Haiti",
+                icon: "🗽",
+                hotel: "Manhattan Hotel (TBC)",
+                travel: "🚇 Subway within Manhattan",
+                plan: "Spend a magical daytime exploring central New York City with Lynsey & Paul.\n\n🍻 9:00 PM: Watch Scotland vs Haiti at an authentic New York Pub alongside the whole crew (with Sam & Chloe)!\n\n🚕 Sleep in Manhattan after the match."
+            },
+            {
+                id: "ka-3",
+                date: "Sunday 14 June",
+                place: "Day in NYC",
+                icon: "🗽",
+                hotel: "Manhattan Hotel (TBC)",
+                travel: "🚇 Subway & classic yellow cabs.",
+                plan: "A full romantic day in the greatest city in the world! Stroll through Central Park, take in the views from Top of the Rock or Summit One Vanderbilt, and check out some amazing restaurants in Soho/West Village."
+            },
+            {
+                id: "ka-4",
+                date: "Monday 15 June",
+                place: "Day in NYC",
+                icon: "🗽",
+                hotel: "Manhattan Hotel (TBC)",
+                travel: "🚶 High-line walking & subway.",
+                plan: "Walk the scenic High Line park in the morning, browse Chelsea Market for lunch, do some world-class shopping on 5th Avenue, and finish with a Broadway show or a jazz club in Greenwich Village."
+            },
+            {
+                id: "ka-5",
+                date: "Tuesday 16 June",
+                place: "Road Trip via Mystic",
+                icon: "🚗",
+                hotel: "Newport En-Route Hotel (TBC)",
+                travel: "🚆 Train Manhattan ➡️ Stamford, CT in morning\n🚗 Meet Lynsey & Paul in Stamford\n🚗 Drive Stamford ➡️ Mystic ➡️ Newport En-Route Hotel",
+                plan: "Morning: Hop on the train up to Stamford, CT and meet Lynsey & Paul who will have hired the road trip car.\n\n🦞 Afternoon: Stop in the historic seaport of Mystic, CT for a lovely coastal walk and lunch (Mystic Pizza, anyone?).\n\nEvening: Drive toward Newport and check in at our cozy hotel en-route."
+            },
+            {
+                id: "ka-6",
+                date: "Wednesday 17 June",
+                place: "Newport & Red Sox Game",
+                icon: "⚾",
+                hotel: "Boston Central Hotel (TBC)",
+                travel: "🚗 Newport ➡️ Boston (approx 1.5 hrs)\n🚙 Drop off hired car on arrival in Boston.\n🚇 T-Subway to Fenway Park.",
+                plan: "Morning & early afternoon: Explore Newport's legendary mansions and spectacular Ocean Drive.\n\nLate Afternoon: Drive to Boston, drop off our hire car and check into our hotel.\n\n⚾ 6:30 PM: Head to iconic Fenway Park to see the Boston Red Sox take on the Toronto Blue Jays!"
+            },
+            {
+                id: "ka-7",
+                date: "Thursday 18 June",
+                place: "Day in Boston",
+                icon: "🦞",
+                hotel: "Boston Central Hotel (TBC)",
+                travel: "🚶 Walking & historic Boston T-Subway system.",
+                plan: "Full sightseeing day in gorgeous Boston! Explore the historic Freedom Trail, grab clam chowder and lobster rolls at Quincy Market, walk the cobblestones of Beacon Hill, and enjoy a pub crawl around historic taverns."
+            },
+            {
+                id: "ka-8",
+                date: "Friday 19 June",
+                place: "Scotland vs Morocco",
+                icon: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+                hotel: "Boston Central Hotel (TBC)",
+                travel: "🚆 Train/Express Event Shuttle from Boston to Foxborough (Gillette Stadium) for Andrew.\n🚶 Local Boston walking for Kaitlin.",
+                plan: "🏆 WORLD Cup GAME DAY: SCOTLAND VS MOROCCO!\n\n🍻 Andrew & Paul head down to Foxborough to join the Tartan Army tailgate at Gillette Stadium!\n\n🛍️ Kaitlin and Lynsey will chill out, shop, and relax together in Boston."
+            },
+            {
+                id: "ka-9",
+                date: "Saturday 20 June",
+                place: "Day in Boston",
+                icon: "🦞",
+                hotel: "Boston Central Hotel (TBC)",
+                plan: "A beautiful full weekend day in Boston. Choose between a premium harbor cruise, visiting Harvard University across the river in Cambridge, or relaxing over drinks in the Seaport District celebrating Scotland's result!"
+            },
+            {
+                id: "ka-10",
+                date: "Sunday 21 June",
+                place: "Drive to JFK & Fly Home",
+                icon: "🚗",
+                hotel: "Overnight Flight (In Transit)",
+                travel: "🚙 Hire a car in Boston.\n🚗 Drive Boston ➡️ JFK Airport (approx 4.5 hrs)\n✈️ Flight: JFK to Manchester (MAN) @ 8:01 PM",
+                plan: "Check out of our Boston hotel early. Drive down back through Massachusetts, Connecticut and New York straight to JFK Airport.\n\nDrop off hire car, check in for return flight to Manchester and enjoy pre-flight airport dinner."
+            },
+            {
+                id: "ka-11",
+                date: "Monday 22 June",
+                place: "Return to Glasgow",
+                icon: "✈️󠁧󠁢󠁳󠁣󠁴󠁿",
+                hotel: "Your Own Bed!",
+                travel: "🛬 Arrive Manchester @ 8:15 AM\n🚗 Drive Manchester Airport ➡️ Glasgow home",
+                plan: "Arrive back in Manchester after an overnight flight. Step into the car and share your best trip memories during the final drive back up north to beautiful Glasgow."
+            }
+        ]
+    };
+
+    function switchTab(tabId) {
+        currentTab = tabId;
+
+        const tabLP = document.getElementById('tab-lynsey_paul');
+        const tabKA = document.getElementById('tab-kaitlin_andrew');
+
+        if (tabId === 'lynsey_paul') {
+            tabLP.className = "flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition bg-usa-red text-white shadow-md shadow-usa-red/10";
+            tabKA.className = "flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition text-slate-200 hover:text-white";
+        } else {
+            tabKA.className = "flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition bg-usa-red text-white shadow-md shadow-usa-red/10";
+            tabLP.className = "flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 tab-transition text-slate-200 hover:text-white";
+        }
+
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const container = document.getElementById('calendar-container');
+        container.innerHTML = '';
+
+        const days = plannerData[currentTab];
+
+        days.forEach(day => {
+            const tile = document.createElement('div');
+            tile.onclick = () => openDetails(day.id);
+            
+            // Check if this date is a Scotland Match Day
+            const isMatchDay = day.date.includes("13 June") || day.date.includes("19 June");
+            
+            // Apply unique background theme for Scotland Match Days
+            if (isMatchDay) {
+                tile.className = "saltire-bg relative overflow-hidden border border-white/40 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-md transition duration-150 cursor-pointer touch-manipulation active:scale-[0.99]";
+            } else {
+                tile.className = "bg-slate-50 border border-slate-200 hover:border-usa-blue/30 active:bg-slate-100 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm transition duration-150 cursor-pointer touch-manipulation active:scale-[0.99]";
+            }
+
+            // High-contrast text values with clean legibility overrides
+            const titleColorClass = isMatchDay ? "text-white font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" : "text-slate-800";
+            const badgeTextColorClass = isMatchDay ? "text-scotland-600 font-bold" : "text-usa-red";
+
+            tile.innerHTML = `
+                <div class="flex items-center space-x-4 min-w-0 flex-1 relative z-10">
+                    <!-- Badge Background Container -->
+                    <div class="flex flex-col items-center justify-center w-14 h-14 bg-white border border-slate-200/80 rounded-xl text-center shrink-0 shadow-sm">
+                        <!-- Date badge text colors adaptive to background themes -->
+                        <span class="text-[10px] font-bold ${badgeTextColorClass} uppercase tracking-wider pb-0.5">${day.date.split(' ')[0].substring(0,3)}</span>
+                        <span class="text-xl font-black ${badgeTextColorClass} leading-none">${day.date.split(' ')[1]}</span>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="font-bold ${titleColorClass} text-sm tracking-tight block truncate">${day.place}</span>
+                    </div>
+                </div>
+                <!-- Clean, Maximum Sized Unboxed Icon Presentation -->
+                <div class="shrink-0 text-4xl pr-1 select-none flex items-center justify-center relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+                    ${day.icon}
+                </div>
+            `;
+            container.appendChild(tile);
+        });
+    }
+
+    function openDetails(dayId) {
+        const day = plannerData[currentTab].find(d => d.id === dayId);
+        if (!day) return;
+
+        document.getElementById('drawer-date').innerText = day.date;
+        document.getElementById('drawer-place').innerText = day.place;
+        document.getElementById('drawer-hotel').innerText = day.hotel;
+        document.getElementById('drawer-plan').innerText = day.plan;
+
+        // Dynamic Travel Formatting (Hide section if not present)
+        const travelSection = document.getElementById('drawer-travel-section');
+        const travelContent = document.getElementById('drawer-travel');
+        
+        if (day.travel) {
+            travelSection.style.display = 'block';
+            travelContent.innerText = day.travel;
+        } else {
+            travelSection.style.display = 'none';
+        }
+
+        const iconContainer = document.getElementById('drawer-icon-container');
+        iconContainer.innerText = day.icon;
+
+        const overlay = document.getElementById('detail-overlay');
+        const drawer = document.getElementById('detail-drawer');
+
+        overlay.classList.remove('pointer-events-none');
+        overlay.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+    }
+
+    function closeDetails() {
+        const overlay = document.getElementById('detail-overlay');
+        const drawer = document.getElementById('detail-drawer');
+
+        overlay.classList.add('pointer-events-none');
+        overlay.classList.remove('opacity-100');
+        drawer.classList.add('translate-x-full');
+    }
+
+    // Initial load
+    renderCalendar();
+</script>
+</body>
+</html>
