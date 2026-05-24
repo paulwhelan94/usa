@@ -55,7 +55,7 @@
         }
         
         /* 
-           SVG Saltire Background 
+            SVG Saltire Background 
         */
         .saltire-bg {
             background-color: #0065BF;
@@ -161,6 +161,19 @@
                         <p id="drawer-plan" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200"></p>
                     </div>
 
+                    <!-- World Cup Games Section (Added at the bottom of the day view) -->
+                    <div id="drawer-wc-section" class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm shadow-scotland-600/5">
+                        <div class="flex items-center space-x-2.5 mb-3 text-scotland-600">
+                            <div class="w-8 h-8 rounded-lg bg-scotland-600/10 flex items-center justify-center">
+                                <i class="fa-solid fa-futbol text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-sm tracking-wide text-slate-800">World Cup Games (Eastern Time)</h3>
+                        </div>
+                        <div id="drawer-wc-games" class="space-y-2">
+                            <!-- Populated dynamically via JavaScript -->
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Footer closing option -->
@@ -178,6 +191,74 @@
 <script>
     // Active configuration state variables
     let currentTab = "lynsey_paul";
+
+    // World Cup Match Dataset (June 12 to June 22, 2026) converted to Eastern Time
+    const worldCupFixtures = {
+        "Friday 12 June": [
+            { teams: "Canada vs Bosnia & Herzegovina", time: "3:00 PM" },
+            { teams: "USA vs Paraguay", time: "9:00 PM" }
+        ],
+        "Saturday 13 June": [
+            { teams: "Qatar vs Switzerland", time: "3:00 PM" },
+            { teams: "Brazil vs Morocco", time: "6:00 PM" },
+            { teams: "Haiti vs Scotland", time: "9:00 PM" },
+            { teams: "Australia vs Türkiye", time: "12:00 AM" }
+        ],
+        "Sunday 14 June": [
+            { teams: "Germany vs Curaçao", time: "1:00 PM" },
+            { teams: "Netherlands vs Japan", time: "4:00 PM" },
+            { teams: "Ivory Coast vs Ecuador", time: "7:00 PM" },
+            { teams: "Sweden vs Tunisia", time: "10:00 PM" }
+        ],
+        "Monday 15 June": [
+            { teams: "Spain vs Cape Verde", time: "12:00 PM" },
+            { teams: "Belgium vs Egypt", time: "3:00 PM" },
+            { teams: "Saudi Arabia vs Uruguay", time: "6:00 PM" },
+            { teams: "Iran vs New Zealand", time: "9:00 PM" }
+        ],
+        "Tuesday 16 June": [
+            { teams: "France vs Senegal", time: "3:00 PM" },
+            { teams: "Iraq vs Norway", time: "6:00 PM" },
+            { teams: "Argentina vs Algeria", time: "9:00 PM" },
+            { teams: "Austria vs Jordan", time: "12:00 AM" }
+        ],
+        "Wednesday 17 June": [
+            { teams: "Portugal vs Congo DR", time: "1:00 PM" },
+            { teams: "England vs Croatia", time: "4:00 PM" },
+            { teams: "Ghana vs Panama", time: "7:00 PM" },
+            { teams: "Uzbekistan vs Colombia", time: "10:00 PM" }
+        ],
+        "Thursday 18 June": [
+            { teams: "Czechia vs South Africa", time: "12:00 PM" },
+            { teams: "Switzerland vs Bosnia & Herzegovina", time: "3:00 PM" },
+            { teams: "Canada vs Qatar", time: "6:00 PM" },
+            { teams: "Mexico vs South Korea", time: "9:00 PM" }
+        ],
+        "Friday 19 June": [
+            { teams: "USA vs Australia", time: "3:00 PM" },
+            { teams: "Scotland vs Morocco", time: "6:00 PM" },
+            { teams: "Brazil vs Haiti", time: "8:30 PM" },
+            { teams: "Türkiye vs Paraguay", time: "12:00 AM" }
+        ],
+        "Saturday 20 June": [
+            { teams: "Netherlands vs Sweden", time: "1:00 PM" },
+            { teams: "Germany vs Ivory Coast", time: "4:00 PM" },
+            { teams: "Ecuador vs Curaçao", time: "8:00 PM" },
+            { teams: "Tunisia vs Japan", time: "12:00 AM" }
+        ],
+        "Sunday 21 June": [
+            { teams: "Spain vs Saudi Arabia", time: "12:00 PM" },
+            { teams: "Belgium vs Iran", time: "3:00 PM" },
+            { teams: "Uruguay vs Cape Verde", time: "6:00 PM" },
+            { teams: "New Zealand vs Egypt", time: "9:00 PM" }
+        ],
+        "Monday 22 June": [
+            { teams: "Argentina vs Austria", time: "1:00 PM" },
+            { teams: "France vs Iraq", time: "5:00 PM" },
+            { teams: "Norway vs Senegal", time: "8:00 PM" },
+            { teams: "Jordan vs Algeria", time: "11:00 PM" }
+        ]
+    };
 
     // Complete Trip Dataset for June 12 to June 22, 2026
     const plannerData = {
@@ -376,7 +457,7 @@
                 travel: "🛬 Arrive Manchester @ 8:15 AM\n🚗 Drive Manchester Airport ➡️ Glasgow home",
                 plan: "Arrive back in Manchester after an overnight flight. Step into the car and share your best trip memories during the final drive back up north to beautiful Glasgow."
             }
-		]
+        ]
     };
 
     function switchTab(tabId) {
@@ -463,6 +544,32 @@
 
         const iconContainer = document.getElementById('drawer-icon-container');
         iconContainer.innerText = day.icon;
+
+        // Dynamic Generation of World Cup Matches for Selected Day
+        const wcSection = document.getElementById('drawer-wc-section');
+        const wcContainer = document.getElementById('drawer-wc-games');
+        wcContainer.innerHTML = ''; // Reset schedule container
+        
+        const fixturesToday = worldCupFixtures[day.date] || [];
+
+        if (fixturesToday.length > 0) {
+            wcSection.style.display = 'block';
+            fixturesToday.forEach(match => {
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-sm";
+                
+                // Bold highlight the home-nation Scotland matches
+                const highlightText = match.teams.includes("Scotland") ? "font-bold text-scotland-600" : "font-medium text-slate-700";
+                
+                row.innerHTML = `
+                    <span class="${highlightText}">${match.teams}</span>
+                    <span class="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded shrink-0 ml-2 font-mono">${match.time}</span>
+                `;
+                wcContainer.appendChild(row);
+            });
+        } else {
+            wcSection.style.display = 'none';
+        }
 
         const overlay = document.getElementById('detail-overlay');
         const drawer = document.getElementById('detail-drawer');
